@@ -1,1 +1,1 @@
-Just open index.html in a browser.
+Just open test.html in a browser.

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            min-width: 150px;
+            border: 1px inset grey;
+            height: 150px;
+            font-size: 128px;
+            text-align: center;
+        }
+		#new_game {
+		    margin-top: 20px;
+			width: 100px;
+			height: 40px;
+		}
+    </style>
+</head>
+<body>
+    <table>
+        <tr>
+            <td id="cell_0" data-id="0"></td>
+            <td id="cell_1" data-id="1"></td>
+            <td id="cell_2" data-id="2"></td>
+        </tr>
+        <tr>
+            <td id="cell_3" data-id="3"></td>
+            <td id="cell_4" data-id="4"></td>
+            <td id="cell_5" data-id="5"></td>
+        </tr>
+        <tr>
+            <td id="cell_6" data-id="6"></td>
+            <td id="cell_7" data-id="7"></td>
+            <td id="cell_8" data-id="8"></td>
+        </tr>
+    </table>
+	<button id="new_game">New game</button>
+</body>
+<script>
+    var cells, flag, mess, count, str;
+    var stamps = ["X", "O"];
+    var tds = document.getElementsByTagName('td');
+	var gameOver = false;
+	
+    function reset(first) {
+        cells = new Array(9);
+        flag = 0;
+        mess = "";
+        count = 0;
+        str = "";
+
+
+        if (first) {
+            loadGame();
+        } else {
+            window.location.hash = "";
+			gameOver = false;
+        }
+
+        for (var i = tds.length - 1; i >= 0; i--) {
+            tds[i].innerHTML = (cells[i] !== undefined) ? stamps[cells[i]] : "";
+
+            if (first) {
+                tds[i].addEventListener("click", function(e) {
+				console.log(2);
+                    move(e.target);
+                });
+            }
+        }
+    }
+
+    reset(true);
+	
+	document.getElementById('new_game').addEventListener("click", function(e) {
+		reset();
+	});;
+
+    function move(cell) {
+		if (cell.innerHTML === "" && gameOver === false) {
+			cell.innerHTML = stamps[flag];
+			cells[cell.dataset.id] = flag;
+			count++;
+			
+			str += str ? "&" : "";
+			str += cell.dataset.id + "=" + flag;
+
+			window.location.hash = str;
+			
+			gameOver = checkEnd();
+
+			if (gameOver !== false) {
+				setTimeout(function(){
+					if (gameOver === true) {
+						mess = "Dead heat ";
+					} else {
+						mess = "Player " + (flag + 1) + " win ";
+					}
+					mess += "in " + count + " moves! Do you want  start a new game?";
+					var newGame = confirm(mess);
+
+					if (newGame) {
+						reset();
+					}
+				}, 100);
+			} else {
+				flag = +!flag;
+			}
+		}
+    }
+
+    function loadGame() {
+        var hash = window.location.hash.slice(1);
+
+        if (hash) {
+            var array = hash.split("&");
+
+            var values = {};
+
+            for (var i = 0; i < array.length; i += 1) {
+                values = array[i].split("=");
+                move(document.getElementById('cell_'+values[0]));
+            }
+        }
+    }
+
+    function checkEnd() {
+        if (cells[0] !== undefined && ((cells[0] === cells[1] && cells[1] === cells[2]) ||
+                (cells[0] === cells[3] && cells[3] === cells[6])))  {
+            return cells[0];
+        }
+
+        if (cells[4] !== undefined && ((cells[1] === cells[4] && cells[4] === cells[7]) ||
+                (cells[3] === cells[4] && cells[4] === cells[5]) ||
+                (cells[2] === cells[4] && cells[4] === cells[6]) ||
+                (cells[0] === cells[4] && cells[4] === cells[8]))) {
+            return cells[4];
+        }
+
+        if (cells[8] !== undefined && ((cells[2] === cells[5] && cells[5] === cells[8]) ||
+                (cells[6] === cells[7] && cells[7] === cells[8]))) {
+            return cells[8];
+        }
+
+        if(cells[0] !== undefined && cells[1] !== undefined  && cells[2] !== undefined  &&
+            cells[3] !== undefined  && cells[4] !== undefined  && cells[5] !== undefined  &&
+            cells[6] !== undefined  && cells[7] !== undefined  && cells[8] !== undefined ) {
+            return true;
+        }
+
+        return false;
+    }
+</script>
+</html>
